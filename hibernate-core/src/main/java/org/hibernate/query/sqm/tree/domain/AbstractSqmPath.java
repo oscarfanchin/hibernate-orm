@@ -24,6 +24,7 @@ import org.hibernate.query.sqm.tree.SqmCopyContext;
 import org.hibernate.query.sqm.tree.expression.AbstractSqmExpression;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 import org.hibernate.query.sqm.tree.expression.SqmLiteral;
+import org.hibernate.query.sqm.tuple.internal.AnonymousTupleType;
 import org.hibernate.spi.EntityIdentifierNavigablePath;
 import org.hibernate.spi.NavigablePath;
 import org.hibernate.spi.TreatedNavigablePath;
@@ -148,6 +149,11 @@ public abstract class AbstractSqmPath<T> extends AbstractSqmExpression<T> implem
 	@Override
 	public SqmPathSource<T> getResolvedModel() {
 		final SqmPathSource<T> pathSource = getReferencedPathSource();
+
+		if (pathSource instanceof AnonymousTupleType<?>) {
+				return pathSource;
+		}
+
 		if ( pathSource.isGeneric()
 				&& getLhs().getResolvedModel().getPathType() instanceof SqmManagedDomainType<?> lhsType ) {
 			final var concreteAttribute = lhsType.findConcreteGenericAttribute( pathSource.getPathName() );
