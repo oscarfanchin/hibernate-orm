@@ -6,6 +6,8 @@
  */
 package org.hibernate.query.sqm.tree.domain;
 
+import static org.hibernate.internal.util.NullnessUtil.castNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import org.hibernate.metamodel.model.domain.EmbeddableDomainType;
 import org.hibernate.metamodel.model.domain.EntityDomainType;
 import org.hibernate.metamodel.model.domain.ManagedDomainType;
 import org.hibernate.metamodel.model.domain.PersistentAttribute;
+import org.hibernate.query.derived.AnonymousTupleType;
 import org.hibernate.query.sqm.NodeBuilder;
 import org.hibernate.query.sqm.SqmExpressible;
 import org.hibernate.query.sqm.SqmPathSource;
@@ -35,8 +38,6 @@ import org.hibernate.spi.TreatedNavigablePath;
 import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.persistence.metamodel.PluralAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
-
-import static org.hibernate.internal.util.NullnessUtil.castNonNull;
 
 /**
  * @author Steve Ebersole
@@ -158,6 +159,12 @@ public abstract class AbstractSqmPath<T> extends AbstractSqmExpression<T> implem
 	public SqmPathSource<?> getResolvedModel() {
 		final DomainType<?> lhsType;
 		final SqmPathSource<T> pathSource = getReferencedPathSource();
+		
+		if(pathSource instanceof AnonymousTupleType<?>) {
+		    
+		    return pathSource;
+		}
+		
 		if ( pathSource.isGeneric() && ( lhsType = getLhs().getResolvedModel().getSqmPathType() ) instanceof ManagedDomainType ) {
 			final PersistentAttribute<?, ?> concreteAttribute = ( (ManagedDomainType<?>) lhsType ).findConcreteGenericAttribute(
 					pathSource.getPathName()

@@ -27,6 +27,25 @@ public class SqmCorrelatedRoot<T> extends SqmRoot<T> implements SqmPathWrapper<T
 		);
 		this.correlationParent = correlationParent;
 	}
+	
+	public SqmCorrelatedRoot(SqmDerivedRoot<T> correlationParent) {
+	     super(
+	             correlationParent.getNavigablePath(),
+	             correlationParent.getReferencedPathSource(),
+	             correlationParent.nodeBuilder()
+	     );
+	     this.correlationParent = correlationParent;
+	}
+	   
+	public SqmCorrelatedRoot(SqmCteRoot<T> correlationParent) {
+	     super(
+	             correlationParent.getNavigablePath(),
+	             correlationParent.getReferencedPathSource(),
+	             correlationParent.nodeBuilder()
+	     );
+	     this.correlationParent = correlationParent;
+	}
+	
 
 	@Override
 	public SqmCorrelatedRoot<T> copy(SqmCopyContext context) {
