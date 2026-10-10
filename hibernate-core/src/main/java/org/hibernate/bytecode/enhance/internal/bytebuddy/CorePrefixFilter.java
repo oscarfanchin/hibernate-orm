@@ -33,12 +33,14 @@ public final class CorePrefixFilter {
 	CorePrefixFilter() {
 		// By default, optimize for Jakarta annotations,
 		// java util collections,
-		// and Hibernate marker interfaces
+		// Hibernate marker interfaces,
+		// and Byte Buddy, which the enhancer loads while it runs
 		this("jakarta.",
 				"java.",
 				"org.hibernate.annotations.",
 				"org.hibernate.bytecode.enhance.spi.",
-				"org.hibernate.engine.spi.");
+				"org.hibernate.engine.spi.",
+				"net.bytebuddy.");
 	}
 
 	public CorePrefixFilter(final String... acceptedPrefixes) {
