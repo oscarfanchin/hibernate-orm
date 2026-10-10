@@ -70,6 +70,7 @@ dependencies {
     testImplementation libs.hibernateModelsJandex
 
     testRuntimeOnly libs.byteBuddy
+    testImplementation libs.byteBuddyAgent
     testRuntimeOnly libs.test.weld
     implementation libs.logging
     testRuntimeOnly(libs.test.wildFlyTxnClient) {
@@ -317,6 +318,37 @@ tasks.withType( Test.class ).configureEach { test ->
         // To reduce the JVM metaspace pressure, reduce the amount of classes that can run in one fork
         test.forkEvery = 8096
     }
+}
+
+// Load-time weaving can only fail while Byte Buddy's classes are not loaded yet,
+// so LoadTimeWeavingTest gets a JVM of its own
+def loadTimeWeavingTest = tasks.register( 'loadTimeWeavingTest', Test ) {
+    description = 'Runs LoadTimeWeavingTest in its own JVM.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    filter {
+        includeTestsMatching 'org.hibernate.orm.test.bytecode.enhance.client.LoadTimeWeavingTest'
+    }
+
+    // What local.java-module.gradle configures on the test task only
+    def test = tasks.test
+    inputs.property( 'dbVersion', test.inputs.properties['dbVersion'] )
+    systemProperties( test.systemProperties )
+    jvmArgs( test.jvmArgs - jvmArgs )
+    testLogging {
+        displayGranularity = test.testLogging.displayGranularity
+        events = test.testLogging.events
+        exceptionFormat = test.testLogging.exceptionFormat
+    }
+}
+tasks.named( 'test', Test ) {
+    filter {
+        excludeTestsMatching 'org.hibernate.orm.test.bytecode.enhance.client.LoadTimeWeavingTest'
+    }
+}
+tasks.named( 'check' ) {
+    dependsOn loadTimeWeavingTest
 }
 
 tasks.named( "javadoc", Javadoc ) {
